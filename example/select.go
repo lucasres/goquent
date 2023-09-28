@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	q := goquent.NewQueryBuilder().Select("user", "email")
+	q := goquent.New().
+		Select("name", "email").
+		From("users")
 
-	fmt.Print(q.Build())
+	sql, _ := q.Build()
+	fmt.Print(sql)
 }
