@@ -13,6 +13,12 @@ func (q *QueryBuilder) Select(cols ...string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) From(t string) *QueryBuilder {
+	q.appendInstruction(NewFromInstruction(t))
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}) {
 	instructionSQL := make([]string, 0)
 
@@ -27,7 +33,7 @@ func (q *QueryBuilder) appendInstruction(i Instruction) {
 	q.instructions = append(q.instructions, i)
 }
 
-func NewQueryBuilder() *QueryBuilder {
+func New() *QueryBuilder {
 	return &QueryBuilder{
 		instructions: make([]Instruction, 0),
 	}
