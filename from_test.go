@@ -15,7 +15,10 @@ func TestFromInstruction(t *testing.T) {
 		}
 
 		for table, expected := range cases {
-			sql, args := goquent.New().From(table).Build()
+			sql, args, err := goquent.New().From(table).Build()
+			if err != nil {
+				t.Error(err)
+			}
 
 			if len(args) > 0 {
 				t.Error("size of args should be 0")

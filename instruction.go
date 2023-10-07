@@ -1,5 +1,5 @@
 package goquent
 
 type Instruction interface {
-	ToSQL() string
+	ToSQL() (string, []interface{}, error)
 }

@@ -19,22 +19,48 @@ func (q *QueryBuilder) From(t string) *QueryBuilder {
 	return q
 }
 
-func (q *QueryBuilder) Build() (string, []interface{}) {
-	instructionSQL := make([]string, 0)
+func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
+	i := NewWhereInstruction(conditionals...)
+
+	q.appendInstruction(i)
+
+	return q
+}
+
+func (q *QueryBuilder) Build() (string, []interface{}, error) {
+	sql := make([]string, 0)
 
 	for _, v := range q.instructions {
-		instructionSQL = append(instructionSQL, v.ToSQL())
+		instructionSQL, args, err := v.ToSQL()
+		if err != nil {
+			return "", nil, err
+		}
+
+		if len(args) > 0 {
+			for _, a := range args {
+				q.args = append(q.args, a)
+			}
+		}
+
+		sql = append(sql, instructionSQL)
 	}
 
-	return strings.Join(instructionSQL, " "), q.args
+	return strings.Join(sql, " "), q.args, nil
 }
 
 func (q *QueryBuilder) appendInstruction(i Instruction) {
 	q.instructions = append(q.instructions, i)
 }
 
+func (q *QueryBuilder) appendArgs(args []interface{}) {
+	for _, v := range args {
+		q.args = append(q.args, v)
+	}
+}
+
 func New() *QueryBuilder {
 	return &QueryBuilder{
 		instructions: make([]Instruction, 0),
+		args:         make([]interface{}, 0),
 	}
 }
