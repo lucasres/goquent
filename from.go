@@ -6,8 +6,8 @@ type FromInstrution struct {
 	table string
 }
 
-func (f *FromInstrution) ToSQL() string {
-	return fmt.Sprintf("FROM %s", f.table)
+func (f *FromInstrution) ToSQL() (string, []interface{}, error) {
+	return fmt.Sprintf("FROM %s", f.table), nil, nil
 }
 
 func NewFromInstruction(t string) Instruction {

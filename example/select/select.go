@@ -11,6 +11,9 @@ func main() {
 		Select("name", "email").
 		From("users")
 
-	sql, _ := q.Build()
+	sql, _, err := q.Build()
+	if err != nil {
+		panic(err)
+	}
 	fmt.Print(sql)
 }
