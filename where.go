@@ -30,7 +30,7 @@ func (w *WhereInstruction) ToSQL() (string, []interface{}, error) {
 		}
 	}
 
-	return strings.Join(sqls, " "), args, nil
+	return "WHERE " + strings.Join(sqls, " "), args, nil
 }
 
 func NewWhereInstruction(conditionals ...conditional) Instruction {
