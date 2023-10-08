@@ -30,10 +30,12 @@ func (c C) Parse() (string, string, []interface{}, error) {
 	}
 
 	if size == 4 {
-		conector, ok := c[3].(string)
+		conectorParsed, ok := c[3].(string)
 		if !ok {
 			return sql, conector, args, fmt.Errorf("invalid C args the 4 is a conector between conditional and need a string gotted: %x", c[3])
 		}
+
+		conector = conectorParsed
 	}
 
 	parsedTest := ""
@@ -65,7 +67,7 @@ func (c C) Parse() (string, string, []interface{}, error) {
 
 	sql = fmt.Sprintf("%s %s %s", column, op, parsedTest)
 
-	return "WHERE " + sql, conector, args, nil
+	return sql, conector, args, nil
 }
 
 func (p *P) Parse() {
