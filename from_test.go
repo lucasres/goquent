@@ -6,7 +6,7 @@ import (
 	"github.com/lucasres/goquent"
 )
 
-func TestFromInstruction(t *testing.T) {
+func TestFromClause(t *testing.T) {
 	t.Run("should generate FROM sql", func(t *testing.T) {
 		cases := map[string]string{
 			"users":    "FROM users",

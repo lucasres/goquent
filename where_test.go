@@ -8,7 +8,7 @@ import (
 	"github.com/lucasres/goquent"
 )
 
-func TestWhereInstruction(t *testing.T) {
+func TestWhereClause(t *testing.T) {
 	t.Run("should create a where clause", func(t *testing.T) {
 		sql, args, err := goquent.New().Where(goquent.C{"status", "=", "actived"}).Build()
 		if err != nil {

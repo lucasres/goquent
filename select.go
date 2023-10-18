@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-type SelectInstruction struct {
+type SelectClause struct {
 	cols []string
 }
 
-func (s *SelectInstruction) ToSQL() (string, []interface{}, error) {
+func (s *SelectClause) ToSQL() (string, []interface{}, error) {
 	colsStr := "*"
 
 	if len(s.cols) != 0 {
@@ -19,8 +19,8 @@ func (s *SelectInstruction) ToSQL() (string, []interface{}, error) {
 	return fmt.Sprintf("SELECT %s", colsStr), nil, nil
 }
 
-func NewSelectInstruction(cols ...string) Instruction {
-	return &SelectInstruction{
+func NewSelectClause(cols ...string) Clause {
+	return &SelectClause{
 		cols: cols,
 	}
 }

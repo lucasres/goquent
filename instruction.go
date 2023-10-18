@@ -1,5 +1,5 @@
 package goquent
 
-type Instruction interface {
+type Clause interface {
 	ToSQL() (string, []interface{}, error)
 }

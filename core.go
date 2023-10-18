@@ -3,26 +3,32 @@ package goquent
 import "strings"
 
 type QueryBuilder struct {
-	instructions []Instruction
-	args         []interface{}
+	Clauses []Clause
+	args    []interface{}
 }
 
 func (q *QueryBuilder) Select(cols ...string) *QueryBuilder {
-	q.appendInstruction(NewSelectInstruction(cols...))
+	q.appendClause(NewSelectClause(cols...))
 
 	return q
 }
 
 func (q *QueryBuilder) From(t string) *QueryBuilder {
-	q.appendInstruction(NewFromInstruction(t))
+	q.appendClause(NewFromClause(t))
 
 	return q
 }
 
 func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
-	i := NewWhereInstruction(conditionals...)
+	i := NewWhereClause(conditionals...)
 
-	q.appendInstruction(i)
+	q.appendClause(i)
+
+	return q
+}
+
+func (q *QueryBuilder) GroupBy(c ...string) *QueryBuilder {
+	q.appendClause(NewGroupByClause(c...))
 
 	return q
 }
@@ -30,8 +36,8 @@ func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
-	for _, v := range q.instructions {
-		instructionSQL, args, err := v.ToSQL()
+	for _, v := range q.Clauses {
+		ClauseSQL, args, err := v.ToSQL()
 		if err != nil {
 			return "", nil, err
 		}
@@ -42,14 +48,14 @@ func (q *QueryBuilder) Build() (string, []interface{}, error) {
 			}
 		}
 
-		sql = append(sql, instructionSQL)
+		sql = append(sql, ClauseSQL)
 	}
 
 	return strings.Join(sql, " "), q.args, nil
 }
 
-func (q *QueryBuilder) appendInstruction(i Instruction) {
-	q.instructions = append(q.instructions, i)
+func (q *QueryBuilder) appendClause(i Clause) {
+	q.Clauses = append(q.Clauses, i)
 }
 
 func (q *QueryBuilder) appendArgs(args []interface{}) {
@@ -60,7 +66,7 @@ func (q *QueryBuilder) appendArgs(args []interface{}) {
 
 func New() *QueryBuilder {
 	return &QueryBuilder{
-		instructions: make([]Instruction, 0),
-		args:         make([]interface{}, 0),
+		Clauses: make([]Clause, 0),
+		args:    make([]interface{}, 0),
 	}
 }
