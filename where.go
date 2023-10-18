@@ -2,11 +2,11 @@ package goquent
 
 import "strings"
 
-type WhereInstruction struct {
+type WhereClause struct {
 	conditionals []conditional
 }
 
-func (w *WhereInstruction) ToSQL() (string, []interface{}, error) {
+func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	args := make([]interface{}, 0)
 	lastIndex := len(w.conditionals) - 1
 	sqls := make([]string, 0)
@@ -33,8 +33,8 @@ func (w *WhereInstruction) ToSQL() (string, []interface{}, error) {
 	return "WHERE " + strings.Join(sqls, " "), args, nil
 }
 
-func NewWhereInstruction(conditionals ...conditional) Instruction {
-	return &WhereInstruction{
+func NewWhereClause(conditionals ...conditional) Clause {
+	return &WhereClause{
 		conditionals: conditionals,
 	}
 }
