@@ -1,17 +1,20 @@
 package goquent
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 )
 
 // This respresent conditional in SQL
 // ex: quantity > 50 => C{"quantity", ">", "50", "AND"}
 type C []interface{}
 
-// This is used if you want group conditioan lin (... AND ...)
+// This is used if you want group your conditionals (... AND ...)
+// ex: you should pass n &goquent.C{}
 type P []interface{}
 
-type conditional interface {
+type Conditional interface {
 	Parse() (string, string, []interface{}, error)
 }
 
@@ -70,6 +73,54 @@ func (c C) Parse() (string, string, []interface{}, error) {
 	return sql, conector, args, nil
 }
 
-func (p *P) Parse() {
+func (p P) Parse() (string, string, []interface{}, error) {
+	sql := make([]string, 0)
+	args := make([]interface{}, 0)
+	lastIndex := len(p) - 1
+	conector := "AND"
 
+	for i, v := range p {
+		parsedC, ok := v.(*C)
+		if ok {
+			sqlC, conectorC, argsC, err := parsedC.Parse()
+			if err != nil {
+				return "", "", nil, err
+			}
+
+			if i != lastIndex && p.moreCondintional(i) {
+				sqlC = sqlC + " " + conectorC
+			}
+
+			for _, a := range argsC {
+				args = append(args, a)
+			}
+
+			sql = append(sql, sqlC)
+			continue
+		}
+
+		parsedS, ok := v.(string)
+		if ok {
+			if i == lastIndex {
+				conector = parsedS
+				continue
+			}
+
+			return "", "", nil, errors.New("only last index is the conector must other should be *goquent.C")
+		}
+
+		return "", "", nil, fmt.Errorf("invalid type at index %d should be *goquent.C or string", i)
+	}
+	return "(" + strings.Join(sql, " ") + ")", conector, args, nil
+}
+
+func (p P) moreCondintional(i int) bool {
+	nI := i + 1
+
+	if nI > len(p)-1 {
+		return false
+	}
+
+	_, ok := p[i+1].(*C)
+	return ok
 }

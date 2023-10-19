@@ -3,7 +3,7 @@ package goquent
 import "strings"
 
 type WhereClause struct {
-	conditionals []conditional
+	conditionals []Conditional
 	q            *QueryBuilder
 }
 
@@ -34,7 +34,7 @@ func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	return "WHERE " + strings.Join(sqls, " "), args, nil
 }
 
-func NewWhereClause(q *QueryBuilder, conditionals ...conditional) Clause {
+func NewWhereClause(q *QueryBuilder, conditionals ...Conditional) Clause {
 	return &WhereClause{
 		conditionals: conditionals,
 		q:            q,

@@ -24,7 +24,7 @@ func (q *QueryBuilder) From(t string) *QueryBuilder {
 	return q
 }
 
-func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
+func (q *QueryBuilder) Where(conditionals ...Conditional) *QueryBuilder {
 	i := NewWhereClause(q, conditionals...)
 
 	q.appendClause(i)
