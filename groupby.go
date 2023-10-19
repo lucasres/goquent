@@ -7,6 +7,7 @@ import (
 
 type GroupByClause struct {
 	cols []string
+	q    *QueryBuilder
 }
 
 func (g *GroupByClause) ToSQL() (string, []interface{}, error) {
@@ -15,8 +16,9 @@ func (g *GroupByClause) ToSQL() (string, []interface{}, error) {
 	return sql, nil, nil
 }
 
-func NewGroupByClause(c ...string) Clause {
+func NewGroupByClause(q *QueryBuilder, c ...string) Clause {
 	return &GroupByClause{
 		cols: c,
+		q:    q,
 	}
 }

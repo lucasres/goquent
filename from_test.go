@@ -15,7 +15,7 @@ func TestFromClause(t *testing.T) {
 		}
 
 		for table, expected := range cases {
-			sql, args, err := goquent.New().From(table).Build()
+			sql, args, err := goquent.New(goquent.MYSQL).From(table).Build()
 			if err != nil {
 				t.Error(err)
 			}

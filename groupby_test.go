@@ -15,7 +15,7 @@ func TestGroupByClasure(t *testing.T) {
 		}
 
 		for wanted, cols := range cases {
-			q := goquent.New().GroupBy(cols...)
+			q := goquent.New(goquent.MYSQL).GroupBy(cols...)
 
 			sql, _, err := q.Build()
 			if err != nil {
@@ -29,7 +29,7 @@ func TestGroupByClasure(t *testing.T) {
 	})
 
 	t.Run("shoul run with outher clausres", func(t *testing.T) {
-		q := goquent.New().Select("user_id", "count(1)").From("contracts").GroupBy("user_id")
+		q := goquent.New(goquent.MYSQL).Select("user_id", "count(1)").From("contracts").GroupBy("user_id")
 
 		sql, _, err := q.Build()
 		if err != nil {

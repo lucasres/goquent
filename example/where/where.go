@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	q, args, err := goquent.New().
+	q, args, err := goquent.New(goquent.MYSQL).
 		Select("*").
 		From("users").
 		Where(
