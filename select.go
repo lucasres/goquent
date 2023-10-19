@@ -7,6 +7,7 @@ import (
 
 type SelectClause struct {
 	cols []string
+	q    *QueryBuilder
 }
 
 func (s *SelectClause) ToSQL() (string, []interface{}, error) {
@@ -19,8 +20,9 @@ func (s *SelectClause) ToSQL() (string, []interface{}, error) {
 	return fmt.Sprintf("SELECT %s", colsStr), nil, nil
 }
 
-func NewSelectClause(cols ...string) Clause {
+func NewSelectClause(q *QueryBuilder, cols ...string) Clause {
 	return &SelectClause{
 		cols: cols,
+		q:    q,
 	}
 }

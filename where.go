@@ -4,6 +4,7 @@ import "strings"
 
 type WhereClause struct {
 	conditionals []conditional
+	q            *QueryBuilder
 }
 
 func (w *WhereClause) ToSQL() (string, []interface{}, error) {
@@ -33,8 +34,9 @@ func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	return "WHERE " + strings.Join(sqls, " "), args, nil
 }
 
-func NewWhereClause(conditionals ...conditional) Clause {
+func NewWhereClause(q *QueryBuilder, conditionals ...conditional) Clause {
 	return &WhereClause{
 		conditionals: conditionals,
+		q:            q,
 	}
 }

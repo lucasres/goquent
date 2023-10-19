@@ -10,7 +10,7 @@ import (
 
 func TestWhereClause(t *testing.T) {
 	t.Run("should create a where clause", func(t *testing.T) {
-		sql, args, err := goquent.New().Where(goquent.C{"status", "=", "actived"}).Build()
+		sql, args, err := goquent.New(goquent.MYSQL).Where(goquent.C{"status", "=", "actived"}).Build()
 		if err != nil {
 			t.Error(err)
 		}
@@ -26,7 +26,7 @@ func TestWhereClause(t *testing.T) {
 	})
 
 	t.Run("should create with more conditionals", func(t *testing.T) {
-		sql, args, err := goquent.New().Where(
+		sql, args, err := goquent.New(goquent.MYSQL).Where(
 			goquent.C{"status", "=", "actived"},
 			goquent.C{"created_at", ">", "2023-12-12"},
 		).Build()
@@ -45,7 +45,7 @@ func TestWhereClause(t *testing.T) {
 	})
 
 	t.Run("should can create with OR operator", func(t *testing.T) {
-		sql, args, err := goquent.New().Where(
+		sql, args, err := goquent.New(goquent.MYSQL).Where(
 			goquent.C{"status", "=", "actived", "OR"},
 			goquent.C{"created_at", ">", "2023-12-12"},
 			goquent.C{"deleted_at", "IS", "NULL"},
@@ -67,7 +67,7 @@ func TestWhereClause(t *testing.T) {
 	t.Run("should return correct args", func(t *testing.T) {
 		argsTestCase := []string{"actived", "2023-12-12", "NULL"}
 
-		_, args, err := goquent.New().Where(
+		_, args, err := goquent.New(goquent.MYSQL).Where(
 			goquent.C{"status", "=", argsTestCase[0]},
 			goquent.C{"created_at", ">", argsTestCase[1]},
 			goquent.C{"deleted_at", "IS", argsTestCase[2]},
@@ -88,14 +88,14 @@ func TestWhereClause(t *testing.T) {
 	})
 
 	t.Run("should return error with invalid args", func(t *testing.T) {
-		_, _, err := goquent.New().Where(
+		_, _, err := goquent.New(goquent.MYSQL).Where(
 			goquent.C{"status", "=", "actived", "OR", "bar", "foo"},
 		).Build()
 		if err == nil {
 			t.Error(errors.New("invalid args must return an error"))
 		}
 
-		_, _, err = goquent.New().Where(
+		_, _, err = goquent.New(goquent.MYSQL).Where(
 			goquent.C{"status", "="},
 		).Build()
 		if err == nil {
@@ -108,7 +108,7 @@ func TestBetweenOperator(t *testing.T) {
 	t.Run("should can handle between sql", func(t *testing.T) {
 		testArgsCases := []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}
 
-		sql, args, err := goquent.New().Where(
+		sql, args, err := goquent.New(goquent.MYSQL).Where(
 			goquent.C{"created_at", "BETWEEN", testArgsCases},
 		).Build()
 		if err != nil {

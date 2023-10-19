@@ -5,22 +5,27 @@ import "strings"
 type QueryBuilder struct {
 	Clauses []Clause
 	args    []interface{}
+	Dialect int
 }
 
+const (
+	MYSQL = iota
+)
+
 func (q *QueryBuilder) Select(cols ...string) *QueryBuilder {
-	q.appendClause(NewSelectClause(cols...))
+	q.appendClause(NewSelectClause(q, cols...))
 
 	return q
 }
 
 func (q *QueryBuilder) From(t string) *QueryBuilder {
-	q.appendClause(NewFromClause(t))
+	q.appendClause(NewFromClause(q, t))
 
 	return q
 }
 
 func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
-	i := NewWhereClause(conditionals...)
+	i := NewWhereClause(q, conditionals...)
 
 	q.appendClause(i)
 
@@ -28,7 +33,7 @@ func (q *QueryBuilder) Where(conditionals ...conditional) *QueryBuilder {
 }
 
 func (q *QueryBuilder) GroupBy(c ...string) *QueryBuilder {
-	q.appendClause(NewGroupByClause(c...))
+	q.appendClause(NewGroupByClause(q, c...))
 
 	return q
 }
@@ -64,9 +69,10 @@ func (q *QueryBuilder) appendArgs(args []interface{}) {
 	}
 }
 
-func New() *QueryBuilder {
+func New(d int) *QueryBuilder {
 	return &QueryBuilder{
 		Clauses: make([]Clause, 0),
 		args:    make([]interface{}, 0),
+		Dialect: d,
 	}
 }
