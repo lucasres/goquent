@@ -59,6 +59,10 @@ func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	return strings.Join(sql, " "), q.args, nil
 }
 
+func (q *QueryBuilder) GetDialect() int {
+	return q.Dialect
+}
+
 func (q *QueryBuilder) appendClause(i Clause) {
 	q.Clauses = append(q.Clauses, i)
 }
