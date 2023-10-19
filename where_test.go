@@ -133,3 +133,124 @@ func TestBetweenOperator(t *testing.T) {
 		}
 	})
 }
+
+func TestParameter(t *testing.T) {
+	t.Run("should can handle with parameter sql", func(t *testing.T) {
+		cases := map[string][]goquent.Conditional{
+			"SELECT * FROM users WHERE (status = ? OR status = ?) AND created_at BETWEEN ? AND ?": {
+				&goquent.P{
+					&goquent.C{"status", "=", "actived", "OR"},
+					&goquent.C{"status", "=", "pedding"},
+				},
+				&goquent.C{"created_at", "BETWEEN", []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}},
+			},
+			"SELECT * FROM users WHERE created_at BETWEEN ? AND ? AND (name = ? OR bar = ?) AND email LIKE ?": {
+				&goquent.C{"created_at", "BETWEEN", []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}},
+				&goquent.P{
+					&goquent.C{"name", "=", "Lucas", "OR"},
+					&goquent.C{"bar", "=", "foo"},
+				},
+				&goquent.C{"email", "LIKE", `%email.com%`},
+			},
+		}
+
+		for wanted, c := range cases {
+			sql, _, err := goquent.New(goquent.MYSQL).
+				Select("*").
+				From("users").
+				Where(c...).
+				Build()
+			if err != nil {
+				t.Error(err)
+			}
+
+			if sql != wanted {
+				t.Errorf("want sql %s but gotted %s", wanted, sql)
+			}
+		}
+	})
+
+	t.Run("should can handle with parameter sql and custom operator", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.P{
+					&goquent.C{"status", "=", "actived", "OR"},
+					&goquent.C{"status", "=", "pedding"},
+					"OR",
+				},
+				&goquent.C{"created_at", "BETWEEN", []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE (status = ? OR status = ?) OR created_at BETWEEN ? AND ?"
+		if sql != testSql {
+			t.Errorf("want sql %s but gotted %s", testSql, sql)
+		}
+	})
+
+	t.Run("should have a err when index of operator will wrong", func(t *testing.T) {
+		_, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.P{
+					&goquent.C{"status", "=", "actived", "OR"},
+					"OR",
+					&goquent.C{"status", "=", "pedding"},
+				},
+				&goquent.C{"created_at", "BETWEEN", []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}},
+			).
+			Build()
+		if err == nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("should have a err when pass not accepted struct in P", func(t *testing.T) {
+		_, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.P{
+					123,
+					&goquent.C{"status", "=", "pedding"},
+					"OR",
+				},
+				&goquent.C{"created_at", "BETWEEN", []string{"2023-01-01 00:00:00", "AND", "2023-12-31 23:59:59"}},
+			).
+			Build()
+		if err == nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("should return args in correct order", func(t *testing.T) {
+		testArgs := []string{"pedding", "foo", "2023-01-01 00:00:00", "2023-12-31 23:59:59"}
+
+		_, args, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.P{
+					&goquent.C{"status", "=", testArgs[0]},
+					&goquent.C{"bar", "=", testArgs[1]},
+				},
+				&goquent.C{"created_at", "BETWEEN", []string{testArgs[2], "AND", testArgs[3]}},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		for i, v := range args {
+			if v != testArgs[i] {
+				t.Errorf("wanted %s gotted %s", testArgs[i], v)
+			}
+		}
+	})
+}
