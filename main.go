@@ -38,6 +38,18 @@ func (q *QueryBuilder) GroupBy(c ...string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) Update(t string) *QueryBuilder {
+	q.appendClause(NewUpdateClause(q, t))
+
+	return q
+}
+
+func (q *QueryBuilder) Set(sets ...S) *QueryBuilder {
+	q.appendClause(NewSetClause(q, sets...))
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
