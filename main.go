@@ -57,6 +57,12 @@ func (q *QueryBuilder) Limit(args ...interface{}) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) Offset(args ...interface{}) *QueryBuilder {
+	q.appendClause(NewOffsetClause(q, args...))
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
