@@ -8,6 +8,10 @@ type WhereClause struct {
 }
 
 func (w *WhereClause) ToSQL() (string, []interface{}, error) {
+	if len(w.conditionals) == 0 {
+		return "", nil, nil
+	}
+
 	args := make([]interface{}, 0)
 	lastIndex := len(w.conditionals) - 1
 	sqls := make([]string, 0)

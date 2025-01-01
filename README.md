@@ -30,6 +30,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print(sql)
+	fmt.Print(sql) // SELECT name, email FROM users
 }
 ```
+
+

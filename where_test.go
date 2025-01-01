@@ -3,6 +3,7 @@ package goquent_test
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/lucasres/goquent"
@@ -251,6 +252,24 @@ func TestParameter(t *testing.T) {
 			if v != testArgs[i] {
 				t.Errorf("wanted %s gotted %s", testArgs[i], v)
 			}
+		}
+	})
+
+	t.Run("should optinal where in sql", func(t *testing.T) {
+		filters := make([]goquent.Conditional, 0)
+
+		sql, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(filters...).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
 		}
 	})
 }

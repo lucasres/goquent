@@ -10,6 +10,7 @@ type QueryBuilder struct {
 
 const (
 	MYSQL = iota
+	PGSQL
 )
 
 func (q *QueryBuilder) Select(cols ...string) *QueryBuilder {
@@ -46,6 +47,12 @@ func (q *QueryBuilder) Update(t string) *QueryBuilder {
 
 func (q *QueryBuilder) Set(sets ...S) *QueryBuilder {
 	q.appendClause(NewSetClause(q, sets...))
+
+	return q
+}
+
+func (q *QueryBuilder) Limit(args ...interface{}) *QueryBuilder {
+	q.appendClause(NewLimitClause(q, args...))
 
 	return q
 }
