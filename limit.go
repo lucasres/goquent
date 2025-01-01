@@ -16,6 +16,10 @@ func (l *LimitClause) ToSQL() (string, []interface{}, error) {
 		return "", nil, fmt.Errorf("in mysql need to set limit value")
 	}
 
+	if l.q.GetDialect() == PGSQL && len(l.a) < 2 {
+		return "", nil, fmt.Errorf("in pgsql need to set limit value binded and offset value")
+	}
+
 	if len(l.a) == 1 && l.q.GetDialect() == MYSQL {
 		limitStr = "LIMIT ?"
 		args = append(args, l.a[0])
