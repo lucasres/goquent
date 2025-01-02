@@ -2,6 +2,8 @@
 
 Hello this is a lib for query build that sintaxe like a SQL. That aim of lib is create a sintaxe very similar to sql if you know sql you should know how this lib work. 
 
+**Zero dependencies**
+
 # Get Start
 
 Get the lib:

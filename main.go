@@ -1,6 +1,15 @@
 package goquent
 
-import "strings"
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
+)
+
+type CallbackScanFunc func(rows *sql.Rows) error
+type CallbackCountScanFunc func(row *sql.Row) error
 
 type QueryBuilder struct {
 	Clauses []Clause
@@ -96,6 +105,23 @@ func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	return strings.Join(sql, " "), q.args, nil
 }
 
+// Returns sql select and count(1) for get total rows
+// must used in pagination who want get list and count total rows for pagination
+func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, error) {
+	sql, args, err := q.Build()
+
+	fromIndex := strings.Index(sql, " FROM")
+
+	var totalSelect string
+	if fromIndex != -1 {
+		totalSelect = sql[:7] + "COUNT(1)" + sql[fromIndex:]
+	} else {
+		return "", "", nil, errors.New("query must need SELECT...FROM")
+	}
+
+	return sql, totalSelect, args, err
+}
+
 func (q *QueryBuilder) GetDialect() int {
 	return q.Dialect
 }
@@ -116,4 +142,67 @@ func New(d int) *QueryBuilder {
 		args:    make([]interface{}, 0),
 		Dialect: d,
 	}
+}
+
+func QueryContext(
+	ctx context.Context,
+	db *sql.DB,
+	q *QueryBuilder,
+	c CallbackScanFunc,
+) error {
+	sql, args, err := q.Build()
+	if err != nil {
+		return fmt.Errorf("build query error: %w", err)
+	}
+
+	rows, err := db.QueryContext(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("exec query fail: %w", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err := c(rows)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func QueryPaginationContext(
+	ctx context.Context,
+	db *sql.DB,
+	q *QueryBuilder,
+	rowsCallback CallbackScanFunc,
+	countCallback CallbackCountScanFunc,
+) error {
+	sql, sqlCount, args, err := q.BuildForPagination()
+	if err != nil {
+		return fmt.Errorf("build query error: %w", err)
+	}
+
+	rows, err := db.QueryContext(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("exec query fail: %w", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rowsCallback(rows)
+		if err != nil {
+			return err
+		}
+	}
+
+	row := db.QueryRowContext(ctx, sqlCount, args...)
+	err = countCallback(row)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
