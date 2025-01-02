@@ -45,6 +45,18 @@ func (q *QueryBuilder) Update(t string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) Insert(table, fields string) *QueryBuilder {
+	q.appendClause(NewInsertClause(q, table, fields))
+
+	return q
+}
+
+func (q *QueryBuilder) Values(values ...V) *QueryBuilder {
+	q.appendClause(NewValuesClause(q, values...))
+
+	return q
+}
+
 func (q *QueryBuilder) Set(sets ...S) *QueryBuilder {
 	q.appendClause(NewSetClause(q, sets...))
 
