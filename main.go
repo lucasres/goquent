@@ -22,6 +22,10 @@ const (
 	PGSQL
 )
 
+const (
+	PGSQL_CONFLIT_DO_NOTHING = "DO NOTHING"
+)
+
 func (q *QueryBuilder) Select(cols ...string) *QueryBuilder {
 	q.appendClause(NewSelectClause(q, cols...))
 
@@ -80,6 +84,12 @@ func (q *QueryBuilder) Limit(args ...interface{}) *QueryBuilder {
 
 func (q *QueryBuilder) Offset(args ...interface{}) *QueryBuilder {
 	q.appendClause(NewOffsetClause(q, args...))
+
+	return q
+}
+
+func (q *QueryBuilder) Conflict(values ...string) *QueryBuilder {
+	q.appendClause(NewConflictClause(q, values...))
 
 	return q
 }
