@@ -15,10 +15,10 @@ type C []interface{}
 type P []interface{}
 
 type Conditional interface {
-	Parse() (string, string, []interface{}, error)
+	Parse(q *QueryBuilder) (string, string, []interface{}, error)
 }
 
-func (c C) Parse() (string, string, []interface{}, error) {
+func (c C) Parse(q *QueryBuilder) (string, string, []interface{}, error) {
 	sql := ""
 	size := len(c)
 	conector := "AND"
@@ -60,11 +60,11 @@ func (c C) Parse() (string, string, []interface{}, error) {
 			return sql, conector, args, fmt.Errorf("operator between in conditional \"%s\" need []string{\"A\", \"AND\", \"B\"}", column)
 		}
 
-		parsedTest = fmt.Sprintf("? %s ?", testList[1])
+		parsedTest = fmt.Sprintf("%s %s %s", getBindIdentifier(q), testList[1], getBindIdentifier(q))
 		args = append(args, testList[0])
 		args = append(args, testList[2])
 	default:
-		parsedTest = "?"
+		parsedTest = getBindIdentifier(q)
 		args = append(args, c[2])
 	}
 
@@ -73,7 +73,7 @@ func (c C) Parse() (string, string, []interface{}, error) {
 	return sql, conector, args, nil
 }
 
-func (p P) Parse() (string, string, []interface{}, error) {
+func (p P) Parse(q *QueryBuilder) (string, string, []interface{}, error) {
 	sql := make([]string, 0)
 	args := make([]interface{}, 0)
 	lastIndex := len(p) - 1
@@ -82,7 +82,7 @@ func (p P) Parse() (string, string, []interface{}, error) {
 	for i, v := range p {
 		parsedC, ok := v.(*C)
 		if ok {
-			sqlC, conectorC, argsC, err := parsedC.Parse()
+			sqlC, conectorC, argsC, err := parsedC.Parse(q)
 			if err != nil {
 				return "", "", nil, err
 			}
@@ -123,4 +123,13 @@ func (p P) moreCondintional(i int) bool {
 
 	_, ok := p[i+1].(*C)
 	return ok
+}
+
+func getBindIdentifier(q *QueryBuilder) string {
+	if q.GetDialect() == MYSQL {
+		return "?"
+	}
+
+	q.updateIndexPGSQL()
+	return fmt.Sprintf("$%d", q.getIndexPGSQL())
 }

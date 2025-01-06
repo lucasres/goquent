@@ -17,7 +17,7 @@ func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	sqls := make([]string, 0)
 
 	for i, c := range w.conditionals {
-		conditioalSql, nextConector, conditioalArgs, err := c.Parse()
+		conditioalSql, nextConector, conditioalArgs, err := c.Parse(w.q)
 		if err != nil {
 			return "", nil, err
 		}

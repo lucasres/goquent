@@ -12,9 +12,10 @@ type CallbackScanFunc func(rows *sql.Rows) error
 type CallbackCountScanFunc func(row *sql.Row) error
 
 type QueryBuilder struct {
-	Clauses []Clause
-	args    []interface{}
-	Dialect int
+	Clauses           []Clause
+	args              []interface{}
+	Dialect           int
+	currentIndexPGSQL int
 }
 
 const (
@@ -152,11 +153,20 @@ func (q *QueryBuilder) appendArgs(args []interface{}) {
 	}
 }
 
+func (q *QueryBuilder) updateIndexPGSQL() {
+	q.currentIndexPGSQL += 1
+}
+
+func (q *QueryBuilder) getIndexPGSQL() int {
+	return q.currentIndexPGSQL
+}
+
 func New(d int) *QueryBuilder {
 	return &QueryBuilder{
-		Clauses: make([]Clause, 0),
-		args:    make([]interface{}, 0),
-		Dialect: d,
+		Clauses:           make([]Clause, 0),
+		args:              make([]interface{}, 0),
+		Dialect:           d,
+		currentIndexPGSQL: 0,
 	}
 }
 
