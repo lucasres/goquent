@@ -94,6 +94,12 @@ func (q *QueryBuilder) Conflict(values ...string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) Delete() *QueryBuilder {
+	q.appendClause(NewDeleteClause(q))
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
