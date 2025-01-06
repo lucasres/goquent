@@ -8,9 +8,8 @@ import (
 type V []interface{}
 
 type ValuesClause struct {
-	q            *QueryBuilder
-	values       []V
-	currentIndex int
+	q      *QueryBuilder
+	values []V
 }
 
 func (ic *ValuesClause) ToSQL() (string, []interface{}, error) {
@@ -30,12 +29,12 @@ func (ic *ValuesClause) ToSQL() (string, []interface{}, error) {
 		} else if ic.q.GetDialect() == PGSQL {
 			sql += "("
 			for j, v := range value {
-				ic.currentIndex++
+				ic.q.updateIndexPGSQL()
 
 				if j != 0 {
 					sql += ", "
 				}
-				sql += fmt.Sprintf("$%d", ic.currentIndex)
+				sql += fmt.Sprintf("$%d", ic.q.getIndexPGSQL())
 
 				args = append(args, v)
 			}
@@ -48,8 +47,7 @@ func (ic *ValuesClause) ToSQL() (string, []interface{}, error) {
 
 func NewValuesClause(q *QueryBuilder, values ...V) Clause {
 	return &ValuesClause{
-		q:            q,
-		values:       values,
-		currentIndex: 0,
+		q:      q,
+		values: values,
 	}
 }

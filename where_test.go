@@ -272,4 +272,27 @@ func TestParameter(t *testing.T) {
 			t.Errorf("wanted %s gotted %s", testSql, sql)
 		}
 	})
+
+	t.Run("should genereate pgsql query correct", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.PGSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.C{"email", "=", "teste@email.com"},
+				&goquent.C{"bar", "=", "foo"},
+				&goquent.P{
+					&goquent.C{"nested1", "=", "foo", "OR"},
+					&goquent.C{"nested2", "=", "foo"},
+				},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE email = $1 AND bar = $2 AND (nested1 = $3 OR nested2 = $4)"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
+		}
+	})
 }
