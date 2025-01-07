@@ -13,8 +13,8 @@ func TestShouldGenerateOffsetQuery(t *testing.T) {
 		sql, args, err := goquent.New(goquent.PGSQL).
 			Select().
 			From("users").
-			Limit("$1", aimLimit).
-			Offset("$2", aimOffset).
+			Limit(aimLimit).
+			Offset(aimOffset).
 			Build()
 
 		if err != nil {

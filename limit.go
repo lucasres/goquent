@@ -1,6 +1,7 @@
 package goquent
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -12,22 +13,16 @@ type LimitClause struct {
 func (l *LimitClause) ToSQL() (string, []interface{}, error) {
 	var limitStr string
 	args := make([]interface{}, 0)
-	if len(l.a) == 0 {
-		return "", nil, fmt.Errorf("in mysql need to set limit value")
-	}
 
-	if l.q.GetDialect() == PGSQL && len(l.a) < 2 {
-		return "", nil, fmt.Errorf("in pgsql need to set limit value binded and offset value")
-	}
-
-	if len(l.a) == 1 && l.q.GetDialect() == MYSQL {
-		limitStr = "LIMIT ?"
+	if len(l.a) == 1 {
+		limitStr = "LIMIT " + getBindIdentifier(l.q)
 		args = append(args, l.a[0])
-	}
-
-	if len(l.a) > 1 {
-		limitStr = fmt.Sprintf("LIMIT %s", l.a[0])
-		args = l.a[1:]
+	} else if len(l.a) == 2 {
+		limitStr = fmt.Sprintf("LIMIT %s, %s", getBindIdentifier(l.q), getBindIdentifier(l.q))
+		args = append(args, l.a[0])
+		args = append(args, l.a[1])
+	} else {
+		return "", nil, errors.New("invalid quantity of args: must be 1 or 2")
 	}
 
 	return limitStr, args, nil
