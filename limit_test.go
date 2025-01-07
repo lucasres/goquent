@@ -12,7 +12,7 @@ func TestShouldGenerateLimitSQL(t *testing.T) {
 		sql, args, err := goquent.New(goquent.PGSQL).
 			Select().
 			From("users").
-			Limit("$1", aimArgs).
+			Limit(aimArgs).
 			Build()
 
 		if err != nil {
@@ -96,7 +96,7 @@ func TestShouldGenerateLimitSQL(t *testing.T) {
 			Select().
 			From("users").
 			Where(goquent.C{"status", "=", "active"}).
-			Limit("?, ?", aimLimit, aimOffset).
+			Limit(aimLimit, aimOffset).
 			Build()
 
 		if err != nil {

@@ -101,6 +101,15 @@ func (q *QueryBuilder) Delete() *QueryBuilder {
 	return q
 }
 
+// Add ORDER BY in query
+// separate fields by , EX: OrderBy("name", "created_at")
+// if want change order ASC or DESC, set ASC or DESC in last arg ex: OrderBy("name", "created_at", "DESC")
+func (q *QueryBuilder) OrderBy(fields ...string) *QueryBuilder {
+	q.appendClause(NewOrderByClause(q, fields...))
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
