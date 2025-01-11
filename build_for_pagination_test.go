@@ -51,4 +51,28 @@ func TestShouldGenerateSelectForPagination(t *testing.T) {
 			t.Errorf("wanted %s but getted %s", aimCount, countSql)
 		}
 	})
+
+	t.Run("should ignore limit and offset in pagination", func(t *testing.T) {
+		sql, countSql, _, err := goquent.New(goquent.PGSQL).
+			Select("name, email, status, created").
+			From("users").
+			Where(goquent.C{"status", "=", "actived"}).
+			Limit("10").
+			Offset("0").
+			BuildForPagination()
+
+		if err != nil {
+			t.Errorf("getted error %e", err)
+		}
+
+		aim := "SELECT name, email, status, created FROM users WHERE status = $1 LIMIT $2 OFFSET $3"
+		if sql != aim {
+			t.Errorf("wanted %s but getted %s", aim, sql)
+		}
+
+		aimCount := "SELECT COUNT(1) FROM users WHERE status = $1"
+		if countSql != aimCount {
+			t.Errorf("wanted %s but getted %s", aimCount, countSql)
+		}
+	})
 }
