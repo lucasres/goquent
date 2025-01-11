@@ -3,7 +3,6 @@ package goquent
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -110,6 +109,12 @@ func (q *QueryBuilder) OrderBy(fields ...string) *QueryBuilder {
 	return q
 }
 
+func (q *QueryBuilder) setClauses(clauses ...Clause) *QueryBuilder {
+	q.Clauses = clauses
+
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []interface{}, error) {
 	sql := make([]string, 0)
 
@@ -134,18 +139,54 @@ func (q *QueryBuilder) Build() (string, []interface{}, error) {
 // Returns sql select and count(1) for get total rows
 // must used in pagination who want get list and count total rows for pagination
 func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, error) {
-	sql, args, err := q.Build()
+	// clausesCopy := make([]Clause, 0, len(q.Clauses))
+	// for _, c := range q.Clauses {
+	// 	if c.WhoIAm() != orderyClause {
+	// 		clausesCopy = append(clausesCopy, c)
+	// 	}
+	// }
 
-	fromIndex := strings.Index(sql, " FROM")
+	// sql, args, err := q.Build()
 
-	var totalSelect string
-	if fromIndex != -1 {
-		totalSelect = sql[:7] + "COUNT(1)" + sql[fromIndex:]
-	} else {
-		return "", "", nil, errors.New("query must need SELECT...FROM")
+	// fromIndex := strings.Index(sql, " FROM")
+
+	// var totalSelect string
+	// if fromIndex != -1 {
+	// 	totalSelect = sql[:7] + "COUNT(1)" + sql[fromIndex:]
+	// } else {
+	// 	return "", "", nil, errors.New("query must need SELECT...FROM")
+	// }
+
+	// return sql, totalSelect, args, err
+	sql := make([]string, 0)
+	totalSelect := make([]string, 0)
+
+	for _, v := range q.Clauses {
+		clauseSQL, args, err := v.ToSQL()
+		if err != nil {
+			return "", "", nil, err
+		}
+
+		if len(args) > 0 {
+			for _, a := range args {
+				q.args = append(q.args, a)
+			}
+		}
+
+		sql = append(sql, clauseSQL)
+		// in pagination dont have order by and select was diferent, need COUNT
+		if v.WhoIAm() != orderbyClause && v.WhoIAm() != selectClause {
+			totalSelect = append(totalSelect, clauseSQL)
+		}
+		// change selecto to COUNT(1)
+		if v.WhoIAm() == selectClause {
+			newSelect := NewSelectClause(q, "COUNT(1)")
+			newSelectSql, _, _ := newSelect.ToSQL()
+			totalSelect = append(totalSelect, newSelectSql)
+		}
 	}
 
-	return sql, totalSelect, args, err
+	return strings.Join(sql, " "), strings.Join(totalSelect, " "), q.args, nil
 }
 
 func (q *QueryBuilder) GetDialect() int {

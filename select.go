@@ -10,6 +10,8 @@ type SelectClause struct {
 	q    *QueryBuilder
 }
 
+const selectClause = "select"
+
 func (s *SelectClause) ToSQL() (string, []interface{}, error) {
 	colsStr := "*"
 
@@ -18,6 +20,10 @@ func (s *SelectClause) ToSQL() (string, []interface{}, error) {
 	}
 
 	return fmt.Sprintf("SELECT %s", colsStr), nil, nil
+}
+
+func (c *SelectClause) WhoIAm() string {
+	return selectClause
 }
 
 func NewSelectClause(q *QueryBuilder, cols ...string) Clause {

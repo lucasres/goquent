@@ -13,6 +13,8 @@ type SetClause struct {
 	q    *QueryBuilder
 }
 
+const setClause = "set"
+
 func (s *SetClause) ToSQL() (string, []interface{}, error) {
 	sql := make([]string, 0)
 	args := make([]interface{}, 0)
@@ -35,7 +37,11 @@ func (s *SetClause) ToSQL() (string, []interface{}, error) {
 	return "SET " + strings.Join(sql, ", "), args, nil
 }
 
-func NewSetClause(q *QueryBuilder, sets ...S) *SetClause {
+func (c *SetClause) WhoIAm() string {
+	return setClause
+}
+
+func NewSetClause(q *QueryBuilder, sets ...S) Clause {
 	return &SetClause{
 		q:    q,
 		sets: sets,

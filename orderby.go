@@ -10,6 +10,8 @@ type OrderByClause struct {
 	fields []string
 }
 
+const orderbyClause = "orderby"
+
 func (o *OrderByClause) ToSQL() (string, []interface{}, error) {
 	var limitStr string
 	order := "ASC"
@@ -30,6 +32,10 @@ func (o *OrderByClause) ToSQL() (string, []interface{}, error) {
 	limitStr = "ORDER BY " + strings.Join(o.fields, ", ") + " " + order
 
 	return limitStr, nil, nil
+}
+
+func (c *OrderByClause) WhoIAm() string {
+	return orderbyClause
 }
 
 func NewOrderByClause(q *QueryBuilder, fields ...string) Clause {
