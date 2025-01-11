@@ -5,8 +5,14 @@ type UpdateClause struct {
 	q     *QueryBuilder
 }
 
+const updateClause = "update"
+
 func (u *UpdateClause) ToSQL() (string, []interface{}, error) {
 	return "UPDATE " + u.table, nil, nil
+}
+
+func (c *UpdateClause) WhoIAm() string {
+	return updateClause
 }
 
 func NewUpdateClause(q *QueryBuilder, table string) Clause {

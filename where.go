@@ -7,6 +7,8 @@ type WhereClause struct {
 	q            *QueryBuilder
 }
 
+const whereClause = "where"
+
 func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	if len(w.conditionals) == 0 {
 		return "", nil, nil
@@ -36,6 +38,10 @@ func (w *WhereClause) ToSQL() (string, []interface{}, error) {
 	}
 
 	return "WHERE " + strings.Join(sqls, " "), args, nil
+}
+
+func (c *WhereClause) WhoIAm() string {
+	return whereClause
 }
 
 func NewWhereClause(q *QueryBuilder, conditionals ...Conditional) Clause {

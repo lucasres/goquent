@@ -28,4 +28,27 @@ func TestShouldGenerateSelectForPagination(t *testing.T) {
 			t.Errorf("wanted %s but getted %s", aimCount, countSql)
 		}
 	})
+
+	t.Run("should ignore order by in pagination", func(t *testing.T) {
+		sql, countSql, _, err := goquent.New(goquent.PGSQL).
+			Select("name, email, status, created").
+			From("users").
+			Where(goquent.C{"status", "=", "actived"}).
+			OrderBy("id").
+			BuildForPagination()
+
+		if err != nil {
+			t.Errorf("getted error %e", err)
+		}
+
+		aim := "SELECT name, email, status, created FROM users WHERE status = $1 ORDER BY id ASC"
+		if sql != aim {
+			t.Errorf("wanted %s but getted %s", aim, sql)
+		}
+
+		aimCount := "SELECT COUNT(1) FROM users WHERE status = $1"
+		if countSql != aimCount {
+			t.Errorf("wanted %s but getted %s", aimCount, countSql)
+		}
+	})
 }

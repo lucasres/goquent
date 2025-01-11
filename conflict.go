@@ -11,6 +11,8 @@ type ConflictClause struct {
 	f      string
 }
 
+const conflictClause = "conflict"
+
 func (c *ConflictClause) ToSQL() (string, []interface{}, error) {
 	if c.q.GetDialect() == PGSQL {
 		sql := "ON CONFLICT"
@@ -28,6 +30,10 @@ func (c *ConflictClause) ToSQL() (string, []interface{}, error) {
 	}
 
 	return "", nil, errors.New("conflict in MYSQL is not implemented")
+}
+
+func (c *ConflictClause) WhoIAm() string {
+	return conflictClause
 }
 
 func NewConflictClause(q *QueryBuilder, values ...string) Clause {

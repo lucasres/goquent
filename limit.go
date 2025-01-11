@@ -10,6 +10,8 @@ type LimitClause struct {
 	a []interface{}
 }
 
+const limitClause = "limit"
+
 func (l *LimitClause) ToSQL() (string, []interface{}, error) {
 	var limitStr string
 	args := make([]interface{}, 0)
@@ -26,6 +28,10 @@ func (l *LimitClause) ToSQL() (string, []interface{}, error) {
 	}
 
 	return limitStr, args, nil
+}
+
+func (c *LimitClause) WhoIAm() string {
+	return limitClause
 }
 
 func NewLimitClause(q *QueryBuilder, args ...interface{}) Clause {

@@ -12,6 +12,8 @@ type ValuesClause struct {
 	values []V
 }
 
+const valuesClause = "values"
+
 func (ic *ValuesClause) ToSQL() (string, []interface{}, error) {
 	sql := "VALUES "
 	args := make([]interface{}, 0)
@@ -43,6 +45,10 @@ func (ic *ValuesClause) ToSQL() (string, []interface{}, error) {
 	}
 
 	return sql, args, nil
+}
+
+func (c *ValuesClause) WhoIAm() string {
+	return valuesClause
 }
 
 func NewValuesClause(q *QueryBuilder, values ...V) Clause {
