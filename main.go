@@ -138,14 +138,15 @@ func (q *QueryBuilder) Build() (string, []interface{}, error) {
 
 // Returns sql select and count(1) for get total rows
 // must used in pagination who want get list and count total rows for pagination
-func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, error) {
+func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, []interface{}, error) {
 	sql := make([]string, 0)
 	totalSelect := make([]string, 0)
+	totalArgs := make([]interface{}, 0)
 
 	for _, v := range q.Clauses {
 		clauseSQL, args, err := v.ToSQL()
 		if err != nil {
-			return "", "", nil, err
+			return "", "", nil, nil, err
 		}
 
 		if len(args) > 0 {
@@ -158,6 +159,11 @@ func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, erro
 		// in pagination dont have order by and select was diferent, need COUNT
 		if v.WhoIAm() != orderbyClause && v.WhoIAm() != selectClause && v.WhoIAm() != limitClause && v.WhoIAm() != offsetClause {
 			totalSelect = append(totalSelect, clauseSQL)
+			if len(args) > 0 {
+				for _, a := range args {
+					totalArgs = append(totalArgs, a)
+				}
+			}
 		}
 		// change selecto to COUNT(1)
 		if v.WhoIAm() == selectClause {
@@ -167,7 +173,7 @@ func (q *QueryBuilder) BuildForPagination() (string, string, []interface{}, erro
 		}
 	}
 
-	return strings.Join(sql, " "), strings.Join(totalSelect, " "), q.args, nil
+	return strings.Join(sql, " "), strings.Join(totalSelect, " "), q.args, totalArgs, nil
 }
 
 func (q *QueryBuilder) GetDialect() int {
@@ -236,7 +242,7 @@ func QueryPaginationContext(
 	rowsCallback CallbackScanFunc,
 	countCallback CallbackCountScanFunc,
 ) error {
-	sql, sqlCount, args, err := q.BuildForPagination()
+	sql, sqlCount, args, argsCount, err := q.BuildForPagination()
 	if err != nil {
 		return fmt.Errorf("build query error: %w", err)
 	}
@@ -255,7 +261,7 @@ func QueryPaginationContext(
 		}
 	}
 
-	row := db.QueryRowContext(ctx, sqlCount, args...)
+	row := db.QueryRowContext(ctx, sqlCount, argsCount...)
 	err = countCallback(row)
 	if err != nil {
 		return err
