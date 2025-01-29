@@ -63,6 +63,27 @@ func (c C) Parse(q *QueryBuilder) (string, string, []interface{}, error) {
 		parsedTest = fmt.Sprintf("%s %s %s", getBindIdentifier(q), testList[1], getBindIdentifier(q))
 		args = append(args, testList[0])
 		args = append(args, testList[2])
+	case "IN":
+		testList, ok := c[2].([]interface{})
+		if !ok && len(testList) > 0 {
+			return sql, conector, args, fmt.Errorf("operator IN in conditional \"%s\" need []interface{\"A\", \"B\", \"C\", ...}", column)
+		}
+		lastIndex := len(testList) - 1
+
+		parsedTest += "("
+
+		for i, v := range testList {
+			parsedTest += getBindIdentifier(q)
+			if i != lastIndex {
+				parsedTest += ","
+			}
+			args = append(args, v)
+		}
+
+		parsedTest += ")"
+
+		args = append(args, testList[0])
+		args = append(args, testList[2])
 	default:
 		parsedTest = getBindIdentifier(q)
 		args = append(args, c[2])

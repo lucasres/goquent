@@ -295,4 +295,78 @@ func TestParameter(t *testing.T) {
 			t.Errorf("wanted %s gotted %s", testSql, sql)
 		}
 	})
+
+	t.Run("should genereate pgsql where IN query correct", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.PGSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.C{"id", "IN", []interface{}{1, 2, 3, 4, 5, 6, 7}},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE id IN ($1,$2,$3,$4,$5,$6,$7)"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
+		}
+	})
+
+	t.Run("should genereate mysql where IN query correct", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.C{"id", "IN", []interface{}{1, 2, 3, 4, 5, 6, 7}},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE id IN (?,?,?,?,?,?,?)"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
+		}
+	})
+
+	t.Run("should genereate mysql where IN and other query correct", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.MYSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.C{"id", "IN", []interface{}{1, 2, 3, 4, 5, 6, 7}, "OR"},
+				&goquent.C{"status", "=", "actived"},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE id IN (?,?,?,?,?,?,?) OR status = ?"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
+		}
+	})
+
+	t.Run("should genereate psql where IN and other query correct", func(t *testing.T) {
+		sql, _, err := goquent.New(goquent.PGSQL).
+			Select("*").
+			From("users").
+			Where(
+				&goquent.C{"id", "IN", []interface{}{1, 2, 3, 4, 5, 6, 7}, "OR"},
+				&goquent.C{"status", "=", "actived"},
+			).
+			Build()
+		if err != nil {
+			t.Error(err)
+		}
+
+		testSql := "SELECT * FROM users WHERE id IN ($1,$2,$3,$4,$5,$6,$7) OR status = $8"
+		if strings.Trim(sql, " ") != testSql {
+			t.Errorf("wanted %s gotted %s", testSql, sql)
+		}
+	})
 }
